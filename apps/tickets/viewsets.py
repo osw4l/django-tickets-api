@@ -1,29 +1,14 @@
-from collections import OrderedDict
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.exceptions import APIException
 from rest_framework import viewsets, mixins
 from rest_framework.decorators import action
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .serializers import TicketSerializer, TicketDetailSerializer, ImageUploadSerializer
 from rest_framework.parsers import MultiPartParser, FormParser
 from .models import Ticket
 from .filters import TicketFilter
-
-
-class TicketPagination(PageNumberPagination):
-    page_size = 5
-
-    def get_paginated_response(self, data):
-        return Response(OrderedDict([
-            ('current_page', self.page.number),
-            ('pages', self.page.paginator.num_pages),
-            ('count', self.page.paginator.count),
-            ('next', self.get_next_link()),
-            ('previous', self.get_previous_link()),
-            ('results', data)
-        ]))
+from .pagination import TicketPagination
 
 
 class TicketViewSet(mixins.CreateModelMixin,
@@ -52,14 +37,15 @@ class TicketViewSet(mixins.CreateModelMixin,
         queryset = super().get_queryset().filter(user=self.request.user)
         return queryset
 
-    @action(detail=True, 
-            methods=['POST'],
-            parser_classes=[
-                MultiPartParser,
-                FormParser
-            ],
-            serializer_class=ImageUploadSerializer
-        )
+    @action(
+        detail=True, 
+        methods=['POST'],
+        parser_classes=[
+            MultiPartParser,
+            FormParser
+        ],
+        serializer_class=ImageUploadSerializer
+    )
     def upload_image(self, request, uuid=None):
         ticket = self.get_object()
         if ticket.can_add_images():
