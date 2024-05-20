@@ -3,6 +3,7 @@ from django.core.validators import MinValueValidator
 from django.db import models, transaction
 from cloudinary.models import CloudinaryField
 from .constants import Status
+from .utils import get_file_extension
 
 
 class StatusModel(models.Model):
@@ -46,12 +47,12 @@ class Ticket(StatusModel):
         return str(self.uuid)
     
     def can_add_images(self):
-        return self.images.count() < self.total_images
+        return self.images.count() < self.total_images and self.status is not Status.FINISHED
     
     def add_image(self, file):
         from .tasks import upload_image
-        
-        file_format = file.content_type.split('/')[1]
+
+        file_format = get_file_extension(file)
         file = file.read()
 
         image = self.images.create()

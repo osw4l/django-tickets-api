@@ -27,9 +27,6 @@ class TicketAdmin(admin.ModelAdmin):
         'status',
         'total_images'
     ]
-    readonly_fields = [
-        'status',
-    ]
     inlines = (
         TicketImageStackedInline,   
     )
