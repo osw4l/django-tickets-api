@@ -50,11 +50,17 @@ class Ticket(StatusModel):
     
     def add_image(self, file):
         from .tasks import upload_image
-
+        
+        file_format = file.content_type.split('/')[1]
         file = file.read()
-        image = self.images.create()
 
-        upload_image.delay(str(image.uuid), file)
+        image = self.images.create()
+        
+        upload_image.delay(
+            photo_uuid=str(image.uuid), 
+            file_format=file_format,
+            file_data=file
+        )
 
     def set_error(self):
         self.status = Status.ERROR

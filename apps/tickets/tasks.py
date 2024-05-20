@@ -5,8 +5,8 @@ from .models import TicketImage
 
 
 @shared_task(name='tickets.upload_image')
-def upload_image(photo_id, file_data, file_format='jpg'):
-    image = TicketImage.objects.get(uuid=photo_id)
+def upload_image(photo_uuid, file_format, file_data):
+    image = TicketImage.objects.get(uuid=photo_uuid)
     image.set_in_progress()
     
     try:
